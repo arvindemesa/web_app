@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="cpu_outer">
+                    <h1>CPU Usage</h1>
+                    <button id="refresh-cpu" class="btn btn-outline-info btn-sm pull-right m-2">Refresh</button>
+                    <table id="cpu-usage-table" class="table cpu_usage_table">
+                        <thead>
+                            <tr>
+                                <th>PID</th>
+                                <th>Name</th>
+                                <th>Cores</th>
+                                <th>CPU Usage</th>
+                                <th>Status</th>
+                                <th>Memory Usage</th>
+                                <th>Read</th>
+                                <th>Write</th>
+                                <th>Threads</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for process in processes %}
+                            <tr>
+                                <td>{{ process.pid }}</td>
+                                <td>{{ process.name }}</td>
+                                <td>{{ process.cores }}</td>
+                                <td>{{ process.cpu_usage }}</td>
+                                <td>{{ process.status }}</td>
+                                <td>{{ process.memory_usage }}</td>
+                                <td>{{ process.read_bytes }}</td>
+                                <td>{{ process.read_bytes }}</td>
+                                <td>{{ process.threads }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="top10_outer">
+                    <h1>TOP 10 Topics with highest view_count</h1>
+                    <ul class="list-group">
+                        {% for list in top10_views %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="{{ list.link }}" target=”_blank”>{{ list.link }}</a>
+                            <span class="badge badge-primary badge-pill" style="color: black;">{{ list.view_count }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function(){
+            function cpuStats(destroy){
+                $('#cpu-usage-table').DataTable({
+                    order: [[3, 'desc']],
+                    scrollX: true,
+                    searching: true,
+                    pageLength: 10,
+                    lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
+                    sortable: true,
+                    responsive: true,
+                    columns: [
+                        { "width": "11%" },
+                        { "width": "11%" },
+                        { "width": "11%" },
+                        { "width": "11%" },
+                        { "width": "11%" },
+                        { "width": "11%" },
+                        { "width": "11%" },
+                        { "width": "11%" },
+                        { "width": "11%" },
+                    ],
+                    language: {
+                        searchPlaceholder: "Filter search",
+                        search: "",
+                    }
+                });
+            }
+            cpuStats(false);
+            $('#refresh-cpu').on('click', function(){
+                $.ajax({
+                    headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                    url : '{% url 'main:refresh-cpu' %}',
+                    dataType: "json",
+                    traditional: true,
+                    data : {},
+                    type : 'POST',
+                    success : function(data){
+                        $('#cpu-usage-table').DataTable({
+                            order: [[3, 'desc']],
+                            data: data.processes,
+                            destroy: true,
+                            scrollX: true,
+                            searching: true,
+                            pageLength: 10,
+                            lengthMenu: [ [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"] ],
+                            sortable: true,
+                            responsive: true,
+                            columns: [
+                                { "width": "11%", 'data': 'pid' },
+                                { "width": "11%", 'data': 'name' },
+                                { "width": "11%", 'data': 'cores' },
+                                { "width": "11%", 'data': 'cpu_usage' },
+                                { "width": "11%", 'data': 'status' },
+                                { "width": "11%", 'data': 'memory_usage' },
+                                { "width": "11%", 'data': 'read_bytes' },
+                                { "width": "11%", 'data': 'write_bytes' },
+                                { "width": "11%", 'data': 'threads' },
+                            ],
+                            language: {
+                                searchPlaceholder: "Filter search",
+                                search: "",
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

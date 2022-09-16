@@ -1,0 +1,14 @@
+.navbar {
+    background-color: #00aba9 !important;
+    position: fixed;
+    width: 100%;
+}
+
+div.content_wrapper {
+    padding: 70px 0;
+}
+
+.top10_outer h1, .cpu_outer h1 {
+    margin: 50px 0;
+    text-align: center;
+}

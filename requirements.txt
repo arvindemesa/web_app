@@ -1,0 +1,4 @@
+django
+psutil
+requests
+gunicorn
